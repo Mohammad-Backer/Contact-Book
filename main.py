@@ -96,68 +96,121 @@ def Display_database(s, ar = 'all'):
 
 
 def Edit_in_database(s, ar):
+    '''
+    This Function checks if the contact to edit exists. If it does, it asks the user what he wants to edit,
+    and it execute a query accordingly.
+
+    Parameters:
+    -----------
+    s: String
+    The name of the database.
+
+    ar: String
+    The name of the contact to be edited.
+
+    '''
     con = sqlite3.connect(s)
     cur = con.cursor()
+    cur.execute(
+        '''
+        SELECT Name
+        FROM contacts
+        '''
+    )
+    names = cur.fetchall()
+    con.commit()
+    exist = False
+    for n in names:
+        if ar == n[0]:
+            exist = True
     
-    while True:
-        continue_edit = input("do you want to continue editing ?")
-        if continue_edit.lower() == 'yes':
-            what_to_edit = input("what to edit?")
-            if what_to_edit.lower() == "name":
-                edited_name = input("The new name is: ")
-                cur.execute(
-                    '''
-                    UPDATE contacts
-                    SET Name = (:edited_name)
-                    WHERE Name = (:name)
-                    ''' , {
-                        "edited_name":edited_name,
-                        "name":ar
-                    }
-                )
-            elif what_to_edit.lower() == "address":
-                edited_address = input("The new address is: ")
-                cur.execute(
-                    '''
-                    UPDATE contacts
-                    SET Address = (:edited_address)
-                    WHERE Name = (:name)
-                    ''' , {
-                        "edited_name":edited_address,
-                        "name":ar
-                    }
-                )
-            elif what_to_edit.lower() == "number":
-                edited_number = input("The new number is: ")
-                cur.execute(
-                    '''
-                    UPDATE contacts
-                    SET Phone_Number = (:edited_number)
-                    WHERE Name = (:name)
-                    ''' , {
-                        "edited_number":edited_number,
-                        "name":ar
-                    }
-                )
-            elif what_to_edit.lower() == "email":
-                edited_email = input("The new email is: ")
-                cur.execute(
-                    '''
-                    UPDATE contacts
-                    SET Email = (:edited_email)
-                    WHERE Name = (:name)
-                    ''' , {
-                        "edited_email":edited_email,
-                        "name":ar
-                    }
-                )
+    if exist == True:
+        while True:
+            continue_edit = input("do you want to continue editing ?")
+            if continue_edit.lower() == 'yes':
+                what_to_edit = input("what to edit?")
+                if what_to_edit.lower() == "name":
+                    edited_name = input("The new name is: ")
+                    cur.execute(
+                        '''
+                        UPDATE contacts
+                        SET Name = (:edited_name)
+                        WHERE Name = (:name)
+                        ''' , {
+                            "edited_name":edited_name,
+                            "name":ar
+                        }
+                    )
+                elif what_to_edit.lower() == "address":
+                    edited_address = input("The new address is: ")
+                    cur.execute(
+                        '''
+                        UPDATE contacts
+                        SET Address = (:edited_address)
+                        WHERE Name = (:name)
+                        ''' , {
+                            "edited_name":edited_address,
+                            "name":ar
+                        }
+                    )
+                elif what_to_edit.lower() == "number":
+                    edited_number = input("The new number is: ")
+                    cur.execute(
+                        '''
+                        UPDATE contacts
+                        SET Phone_Number = (:edited_number)
+                        WHERE Name = (:name)
+                        ''' , {
+                            "edited_number":edited_number,
+                            "name":ar
+                        }
+                    )
+                elif what_to_edit.lower() == "email":
+                    edited_email = input("The new email is: ")
+                    cur.execute(
+                        '''
+                        UPDATE contacts
+                        SET Email = (:edited_email)
+                        WHERE Name = (:name)
+                        ''' , {
+                            "edited_email":edited_email,
+                            "name":ar
+                        }
+                    )
+                else:
+                    print("I don't understand!")
             else:
-                print("I don't understand!")
-        else:
-            break
-        con.commit()
+                break
+            con.commit()
+        con.close()
+    else :
+        print("This name does not exist!")
+
+
+def Delete_from_Database(s, ar):
+    '''
+    This function chooses a line from the table contacts where the name is equal to ar, and deletes it.
+
+    Parameters:
+    -----------
+    s: String
+    The name of the database
+
+    ar: String
+    The name of the contact to be deleted.
+
+    '''
+    con = sqlite3.connect(s)
+    cur = con.cursor()
+    ar_dict = {"name":ar}
+    cur.execute(
+        '''
+        DELETE FROM contacts
+        WHERE Name = (:name)
+        ''',ar_dict
+    )
+    con.commit()
     con.close()
-    
 
 def main():
     
@@ -194,6 +247,13 @@ def main():
                 if len(sys.argv) < 3:
                     print("Please Specify the name of the contact you want to edit next time!")
                     break
+            elif sys.argv[1] == 'delete':
+                if len(sys.argv) >= 3:
+                    ar = sys.argv[2]
+                    Delete_from_Database(s, ar)
+                    break
+                else:
+                    print("You should specify which contact to be deleted by entering its name!")
                 
         else:
             print(
@@ -201,6 +261,8 @@ def main():
             Add argument add in the command line to add a contact.\n
             Add argument display in the command line to display all your contacts.\n
             Add argument display x in the command line to display the information of the contact with the name: x.\n
+            Add argument Edit x to edit a contact with x its name.
+            Add argument Delete x to delete a contact with x its name.
             Thank you!
             ''')
             break
