@@ -76,7 +76,7 @@ def Display_database(s, ar = 'all'):
     It represents the name of the contact, and it will be used in the Where clause, for the sql querrey.
     s : String
     It is the name of the function.
-    
+
     """
     ar_dict = {
         "name":ar
@@ -93,6 +93,71 @@ def Display_database(s, ar = 'all'):
     
     con.commit()
     con.close()
+
+
+def Edit_in_database(s, ar):
+    con = sqlite3.connect(s)
+    cur = con.cursor()
+    
+    while True:
+        continue_edit = input("do you want to continue editing ?")
+        if continue_edit.lower() == 'yes':
+            what_to_edit = input("what to edit?")
+            if what_to_edit.lower() == "name":
+                edited_name = input("The new name is: ")
+                cur.execute(
+                    '''
+                    UPDATE contacts
+                    SET Name = (:edited_name)
+                    WHERE Name = (:name)
+                    ''' , {
+                        "edited_name":edited_name,
+                        "name":ar
+                    }
+                )
+            elif what_to_edit.lower() == "address":
+                edited_address = input("The new address is: ")
+                cur.execute(
+                    '''
+                    UPDATE contacts
+                    SET Address = (:edited_address)
+                    WHERE Name = (:name)
+                    ''' , {
+                        "edited_name":edited_address,
+                        "name":ar
+                    }
+                )
+            elif what_to_edit.lower() == "number":
+                edited_number = input("The new number is: ")
+                cur.execute(
+                    '''
+                    UPDATE contacts
+                    SET Phone_Number = (:edited_number)
+                    WHERE Name = (:name)
+                    ''' , {
+                        "edited_number":edited_number,
+                        "name":ar
+                    }
+                )
+            elif what_to_edit.lower() == "email":
+                edited_email = input("The new email is: ")
+                cur.execute(
+                    '''
+                    UPDATE contacts
+                    SET Email = (:edited_email)
+                    WHERE Name = (:name)
+                    ''' , {
+                        "edited_email":edited_email,
+                        "name":ar
+                    }
+                )
+            else:
+                print("I don't understand!")
+        else:
+            break
+        con.commit()
+    con.close()
+    
 
 def main():
     
@@ -113,7 +178,7 @@ def main():
                 contact = ct.Contacts(name, address, num, mail)
                 add_to_database(contact,s)
                 break
-            if sys.argv[1] == 'display':
+            elif sys.argv[1] == 'display':
                 if len(sys.argv) < 3:
                     Display_database(s)
                     break
@@ -121,6 +186,15 @@ def main():
                     ar = sys.argv[2]
                     Display_database(s, ar)
                     break
+            elif sys.argv[1] == 'edit':
+                if len(sys.argv) >= 3:
+                    ar = sys.argv[2]
+                    Edit_in_database(s, ar)
+                    break
+                if len(sys.argv) < 3:
+                    print("Please Specify the name of the contact you want to edit next time!")
+                    break
+                
         else:
             print(
             '''
